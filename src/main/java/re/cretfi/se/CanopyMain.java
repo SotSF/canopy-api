@@ -1,5 +1,6 @@
 package re.cretfi.se;
 
+import com.heroicrobot.dropbit.registry.DeviceRegistry;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -12,8 +13,10 @@ public class CanopyMain {
         Server server = new Server(7070);
         ServletContextHandler handler = new ServletContextHandler(server, "/");
 
+        DeviceRegistry registry = new DeviceRegistry();
+
         // hi java
-        ServletHolder holder = new ServletHolder(new CanopyServlet("oh, hi"));
+        ServletHolder holder = new ServletHolder(new CanopyServlet(registry));
         handler.addServlet(holder, "/");
         server.start();
         System.out.println("Server Started");

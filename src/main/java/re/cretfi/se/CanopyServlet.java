@@ -1,5 +1,7 @@
 package re.cretfi.se;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.heroicrobot.dropbit.devices.pixelpusher.Pixel;
 import com.heroicrobot.dropbit.devices.pixelpusher.Strip;
 import com.heroicrobot.dropbit.registry.DeviceRegistry;
@@ -11,24 +13,23 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observer;
 
 public class CanopyServlet extends HttpServlet implements Observer {
 
+    private GsonBuilder gson;
     public boolean hasStrips = false;
 
     // private
     DeviceRegistry registry;
     private boolean pushing;
 
-    CanopyServlet() {
+    CanopyServlet(DeviceRegistry registry, GsonBuilder gson) {
         this.registry = new DeviceRegistry();
-        initialize();
-    }
-
-    public CanopyServlet(DeviceRegistry registry) {
-        this.registry = registry;
+        this.gson = gson;
         initialize();
     }
 
@@ -81,7 +82,12 @@ public class CanopyServlet extends HttpServlet implements Observer {
     }
 
     private void stats(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.getWriter().println(pushing);
+
+        JsonObject stats = new JsonObject();
+        stats.addProperty("pushing", this.pushing);
+        stats.addProperty("hello", "world");
+
+        resp.getWriter().println(stats.toString());
         resp.setStatus(HttpStatus.OK_200);
     }
 
@@ -93,6 +99,7 @@ public class CanopyServlet extends HttpServlet implements Observer {
         } else {
             resp.getWriter().println("false");
         }
+
     }
 
     public void update(java.util.Observable registry, Object updatedDevice) {
@@ -102,5 +109,4 @@ public class CanopyServlet extends HttpServlet implements Observer {
         }
         this.hasStrips = true;
     }
-
 }

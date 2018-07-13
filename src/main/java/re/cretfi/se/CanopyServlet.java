@@ -9,10 +9,18 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class CanopyServlet extends HttpServlet {
+
+    String message;
+
+    CanopyServlet(String msg) {
+        message = msg;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         resp.setStatus(HttpStatus.OK_200);
-        resp.getWriter().println("oh, hi there");
+        resp.getWriter().println(message);
     }
+
 }

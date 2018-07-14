@@ -30,43 +30,4 @@ public class CanopyMain {
         server.join();
 
     }
-    public static void mainAnother(String[] args) throws Exception {
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
-        context.setContextPath("/");
-
-        Server jettyServer = new Server(9999);
-        jettyServer.setHandler(context);
-
-        ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
-        jerseyServlet.setInitOrder(0);
-
-        // Tells the Jersey Servlet which REST service/class to load.
-        jerseyServlet.setInitParameter("jersey.config.server.provider.packages", "re.cretfi.se.api");
-
-        try {
-            jettyServer.start();
-            jettyServer.join();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            jettyServer.destroy();
-        }
-
-    }
-
-    public static void mainOld(String[] args) throws Exception{
-
-        // Create and start the web server
-        System.out.println("Starting server.");
-        Server server = new Server(7070);
-        ServletContextHandler handler = new ServletContextHandler(server, "/");
-
-        GsonBuilder gson = new GsonBuilder();
-        DeviceRegistry registry = new DeviceRegistry();
-
-        ServletHolder holder = new ServletHolder(new CanopyServlet(registry, gson));
-        handler.addServlet(holder, "/");
-        server.start();
-        System.out.println("Server Started");
-    }
 }

@@ -9,6 +9,10 @@ import java.util.List;
 
 public class RegistryStats {
 
+    // Maintained by us
+    private final boolean pushing;
+
+    // Maintained by registry
     private final double powerScale;
     private final int frameLimit;
     private final boolean logEnabled;
@@ -16,7 +20,8 @@ public class RegistryStats {
     private final long totalPowerLimit;
     private final Pusher[] pushers;
 
-    public RegistryStats(DeviceRegistry registry) {
+    public RegistryStats(DeviceRegistry registry, boolean pushing) {
+        this.pushing = pushing;
         frameLimit = registry.getFrameLimit();
         logEnabled = registry.getLogging();
         totalPower = registry.getTotalPower();

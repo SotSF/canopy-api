@@ -22,9 +22,9 @@ public class CanopyServlet extends HttpServlet implements Observer {
     private GsonBuilder gson;
     public boolean hasStrips = false;
 
-    // private
+    // private/**/
     DeviceRegistry registry;
-    private boolean pushing;
+    private boolean pushing;/**/
 
     CanopyServlet(DeviceRegistry registry, GsonBuilder gson) {
         this.registry = registry;

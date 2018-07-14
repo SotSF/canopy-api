@@ -84,7 +84,6 @@ public class CanopyServlet extends HttpServlet implements Observer {
 
         JsonObject stats = new JsonObject();
         stats.addProperty("pushing", this.pushing);
-        stats.addProperty("hello", "world");
         stats.addProperty("frameLimit", registry.getFrameLimit());
         stats.addProperty("logEnabled", registry.getLogging());
         stats.addProperty("totalPower", registry.getTotalPower());
@@ -95,7 +94,6 @@ public class CanopyServlet extends HttpServlet implements Observer {
 
         System.out.println("pushermap: " + registry.getPusherMap());
 
-        // This blows up at runtime with NullPointerException for some reason.
         for (PixelPusher p : registry.getPusherMap().values()) {
             JsonObject pusher = new JsonObject();
             pusher.addProperty("numberOfStrips", p.getNumberOfStrips());

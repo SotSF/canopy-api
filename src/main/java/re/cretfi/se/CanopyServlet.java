@@ -27,7 +27,7 @@ public class CanopyServlet extends HttpServlet implements Observer {
     private boolean pushing;
 
     CanopyServlet(DeviceRegistry registry, GsonBuilder gson) {
-        this.registry = new DeviceRegistry();
+        this.registry = registry;
         this.gson = gson;
         initialize();
     }
@@ -91,23 +91,25 @@ public class CanopyServlet extends HttpServlet implements Observer {
         stats.addProperty("totalPowerLimit", registry.getTotalPowerLimit());
         stats.addProperty("powerScale", registry.getPowerScale());
 
-//        JsonArray pushers = new JsonArray();
-//
-//        // This blows up at runtime with NullPointerException for some reason.
-//        for (PixelPusher p : registry.getPusherMap().values()) {
-//            JsonObject pusher = new JsonObject();
-//            pusher.addProperty("numberOfStrips", p.getNumberOfStrips());
-//            pusher.addProperty("maxStripsPerPacket", p.getMaxStripsPerPacket());
-//            pusher.addProperty("pixelsPerStrip", p.getPixelsPerStrip());
-//            pusher.addProperty("pusherFlags", p.getPusherFlags());
-//            pusher.addProperty("updatePeriod", p.getUpdatePeriod());
-//            pusher.addProperty("powerTotal", p.getPowerTotal());
-//            pusher.addProperty("deltaSequence", p.getDeltaSequence());
-//            pusher.addProperty("extraDelay", p.getExtraDelay());
-//            pushers.add(pusher);
-//        }
-//
-//        stats.add("pushers", pushers);
+        JsonArray pushers = new JsonArray();
+
+        System.out.println("pushermap: " + registry.getPusherMap());
+
+        // This blows up at runtime with NullPointerException for some reason.
+        for (PixelPusher p : registry.getPusherMap().values()) {
+            JsonObject pusher = new JsonObject();
+            pusher.addProperty("numberOfStrips", p.getNumberOfStrips());
+            pusher.addProperty("maxStripsPerPacket", p.getMaxStripsPerPacket());
+            pusher.addProperty("pixelsPerStrip", p.getPixelsPerStrip());
+            pusher.addProperty("pusherFlags", p.getPusherFlags());
+            pusher.addProperty("updatePeriod", p.getUpdatePeriod());
+            pusher.addProperty("powerTotal", p.getPowerTotal());
+            pusher.addProperty("deltaSequence", p.getDeltaSequence());
+            pusher.addProperty("extraDelay", p.getExtraDelay());
+            pushers.add(pusher);
+        }
+
+        stats.add("pushers", pushers);
 
         resp.getWriter().println(stats.toString());
         resp.setStatus(HttpStatus.OK_200);

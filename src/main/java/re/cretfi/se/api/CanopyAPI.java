@@ -12,16 +12,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Observer;
 
 @Path("/api")
-public class CanopyAPI {
+public class CanopyAPI implements Observer {
 
     private DeviceRegistry registry;
+    boolean hasStrips;
     boolean pushing;
 
     @Inject
     CanopyAPI(DeviceRegistry registry) {
         this.registry = registry;
+        registry.addObserver(this);
     }
 
     @GET
@@ -80,5 +83,13 @@ public class CanopyAPI {
             }
         }
         return true;
+    }
+
+    public void update(java.util.Observable registry, Object updatedDevice) {
+        System.out.println("Registry update detected");
+        if (updatedDevice != null) {
+            System.out.println("Device change: " + updatedDevice);
+        }
+        this.hasStrips = true;
     }
 }

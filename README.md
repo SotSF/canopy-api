@@ -11,14 +11,4 @@ Once the jar is built, you can run it with `java -jar [path-to-jar]`. It's proba
 java -jar target/canopy-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
-Building pixelpusher.jar
----
-
-pixelpusher.jar is built from the official PixelPusher-java repo. From the root of a checkout of Pixelpusher-java:
-
-```
-cd bin/
-jar cf pixelpusher.jar *
-```
-
-This is copied into our project under `src/main/resources/pixelpusher.jar`.
+Note: the Pixelpusher-java code is included under src/ and gets compiled with the main project.

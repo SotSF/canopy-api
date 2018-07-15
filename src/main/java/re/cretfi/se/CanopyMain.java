@@ -14,6 +14,8 @@ import re.cretfi.se.api.ApplicationConfig;
 public class CanopyMain {
     public static void main(String[] args) throws Exception {
 
+        int port = 8080;
+
         DeviceRegistry registry = new DeviceRegistry();
 
         ResourceConfig config = new ApplicationConfig(registry);
@@ -22,10 +24,13 @@ public class CanopyMain {
         ServletHolder jerseyServlet
                 = new ServletHolder(new ServletContainer(config));
 
-        Server server = new Server(8080);
+        Server server = new Server(port);
         ServletContextHandler context
                 = new ServletContextHandler(server, "/");
         context.addServlet(jerseyServlet, "/*");
+
+        System.out.println("Starting server on port " + port);
+
         server.start();
         server.join();
 

@@ -17,6 +17,7 @@ public class CanopyMain {
         int port = 8080;
 
         DeviceRegistry registry = new DeviceRegistry();
+//        registry.setLogging(false);
 
         ResourceConfig config = new ApplicationConfig(registry);
         config.packages("re.cretfi.se.api"); // TODO: put this in the config??

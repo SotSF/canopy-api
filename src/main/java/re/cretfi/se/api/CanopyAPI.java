@@ -12,15 +12,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Base64;
-import java.util.List;
-import java.util.Observer;
+import java.util.*;
 
 @Path("/api")
 public class CanopyAPI implements Observer {
 
     private DeviceRegistry registry;
 
+    byte[] renderBuffer = new byte[0];
     boolean pushing;
 
     @Inject
@@ -29,6 +28,7 @@ public class CanopyAPI implements Observer {
         this.pushing = true;
         registry.startPushing();
         registry.addObserver(this);
+//        registry.setFrameCallback(this, "flush");
     }
 
     @GET
@@ -77,13 +77,15 @@ public class CanopyAPI implements Observer {
     @GET
     @Path("/clear")
     public boolean clear() {
-        List<Strip> strips = registry.getStrips();
-        Pixel pixel = new Pixel(0);
-        for (Strip strip : strips) {
-            for (int i = 0; i < strip.getLength(); i++){
-                strip.setPixel(pixel, i);
-            }
-        }
+        Optional<Integer> pixelCount = registry.getStrips()
+                .stream()
+                .map(strip -> strip.getLength())
+                .reduce((count, length) -> count + length);
+
+        byte[] pixels = new byte[pixelCount.orElse(0)];
+
+        this.renderBuffer = pixels;
+        flush();
         return true;
     }
 
@@ -95,25 +97,9 @@ public class CanopyAPI implements Observer {
         if (data.length % 3 != 0)
             return "invalid pixel array length";
 
-        List<Strip> strips = registry.getStrips();
-        Pixel p = new Pixel();
+        this.renderBuffer = data;
+        flush();
 
-        System.out.println("Got data:" + data);
-
-        int i = 0;
-        striploop:
-        for (Strip strip : strips) {
-
-            Pixel[] pixels = new Pixel[strip.getLength()];
-
-            for (int j=0; j < strip.getLength(); j++) {
-                if (i >= data.length-2)
-                    break striploop;
-                pixels[j] = new Pixel(data[i], data[i+1], data[i+2]);
-                i += 3;
-            }
-            strip.setPixels(pixels);
-        }
         return "yay\n";
     }
 
@@ -132,6 +118,24 @@ public class CanopyAPI implements Observer {
     @Override
     public void update(java.util.Observable registry, Object updatedDevice) {
         // For whatever reason, storing and reusing the strips from here causes a silent hang.
-        // this.strips = this.registry.getStrips();
+//        strips = this.registry.getStrips();
+    }
+
+    public void flush() {
+        List<Strip> strips = registry.getStrips();
+
+        int bufferLength = renderBuffer.length;
+        for (Strip strip : strips) {
+            int stripLength = strip.getLength();
+            Pixel[] pixels = new Pixel[stripLength];
+
+            for (int j=0, i=0;
+                 j < stripLength && i < bufferLength - 2;
+                 j++, i+= 3) {
+                pixels[j] = new Pixel(renderBuffer[i], renderBuffer[i+1], renderBuffer[i+2]);
+//                strip.setPixel(pixel, j);
+            }
+            strip.setPixels(pixels);
+        }
     }
 }

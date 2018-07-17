@@ -92,7 +92,12 @@ public class CanopyAPI implements Observer {
     @POST
     @Path("/render")
     public String render(String requestData) {
-        byte[] data = Base64.getDecoder().decode(requestData);
+        byte[] data = new byte[0];
+        try{
+            data = Base64.getDecoder().decode(requestData);
+        } catch (IllegalArgumentException e){
+            System.out.println("Caught bad b64 string: " + requestData);
+        }
 
         if (data.length % 3 != 0)
             return "invalid pixel array length";
@@ -102,6 +107,22 @@ public class CanopyAPI implements Observer {
 
         return "yay\n";
     }
+
+    @POST
+    @Path("/renderbytes")
+    public String renderbytes(String requestData) {
+        byte[] data = requestData.getBytes();
+
+        if (data.length % 3 != 0)
+            return "invalid pixel array length";
+
+        this.renderBuffer = data;
+        flush();
+
+        return "yay\n";
+    }
+
+
 
     @POST
     @Path("/echo")
@@ -123,16 +144,15 @@ public class CanopyAPI implements Observer {
 
     public void flush() {
         List<Strip> strips = registry.getStrips();
-
         int bufferLength = renderBuffer.length;
         for (Strip strip : strips) {
             int stripLength = strip.getLength();
             Pixel[] pixels = new Pixel[stripLength];
 
-            for (int j=0, i=0;
+            for (int j = 0, i = 0;
                  j < stripLength && i < bufferLength - 2;
-                 j++, i+= 3) {
-                pixels[j] = new Pixel(renderBuffer[i], renderBuffer[i+1], renderBuffer[i+2]);
+                 j++, i += 3) {
+                pixels[j] = new Pixel(renderBuffer[i], renderBuffer[i + 1], renderBuffer[i + 2]);
 //                strip.setPixel(pixel, j);
             }
             strip.setPixels(pixels);

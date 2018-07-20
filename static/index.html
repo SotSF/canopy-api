@@ -1,156 +1,79 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Accelerometer Javascript Test</title>
-<meta name="viewport" content="width=device-width,user-scalable=yes" />
-<style>
-body {
-	font-family: helvetica, arial, sans serif;
-}
-#sphere {
-	position: absolute;	
-	width: 50px;
-	height: 50px;
-	border-radius: 50px;
-	-webkit-radius: 50px;
-	background-color: blue;
-}
-</style>
+    <title>Accelerometer Javascript Shenanigans</title>
+    <meta name="viewport" content="width=device-width,user-scalable=yes" />
+    <style>
+        body {
+            font-family: helvetica, arial, sans serif;
+        }
+    </style>
 </head>
 
 <body>
-<div id="content">
-    <h1>Accelerometer Javascript Test</h1>
-    <div id="sphere"></div>
-<ul>
-	<!-- <li>accelerationIncludingGravity.x: <span id="accelerationIncludingGravityX"></span>g</li>
-	<li>accelerationIncludingGravity.y: <span id="accelerationIncludingGravityY"></span>g</li>
-    <li>accelerationIncludingGravity.z: <span id="accelerationIncludingGravityZ"></span>g</li>
-    <li>acceleration.x: <span id="accelerationX"></span>g</li>
-    <li>accelerationXSmoothed: <span id="accelerationXSmoothed"></span>g</li>
-    <li>acceleration.y: <span id="accelerationY"></span>g</li>
-    <li>acceleration.z: <span id="accelerationZ"></span>g</li>
-	<li>rotation alpha: <span id="rotationAlpha"></span>degree</li>
-	<li>rotation beta: <span id="rotationBeta"></span>degree</li>
-    <li>rotation gamma: <span id="rotationGamma"></span>degree</li> -->
-    
-    <!-- <li>max X: <span id="maxX"></span>g</li>
-    <li>max Y: <span id="maxY"></span>g</li>
-    <li>max Z: <span id="maxZ"></span>g</li> -->
-    <li>max: <span id="max">m</span></li>
-    <li>magnitude: <span id="magnitude">m</span></li>
-</ul>
+    <div id="content">
+        <h1>Accelerometer Javascript Test</h1>
+        <ul>
+            <li>max: <span id="max">m</span></li>
+            <li>magnitude: <span id="magnitude">m</span></li>
+        </ul>
+        
+        <ul id="fast">
+            Fasts:
+        </ul>
+        
+    </div>
+    <script type="text/javascript">
+        // Only do stuff every ${freq} millis.
+        var freq = 100;
+        var last_time = new Date().valueOf();
+        
+        // Keep track of the max magnitude for funsies.
+        var maxMagnitude = 0;
+        
+        // Movement is considered fast if the magnitude exceeds fastThreshold.
+        var fastThreshold = 10;
+        var fast = false;
+        
+        if (window.DeviceMotionEvent != undefined) {
 
-<ul id="fast">
-    fast
-    
-</ul>
+            // Magic sauce
+            window.ondevicemotion = function(e) {
 
-</div>
-<script type="text/javascript">
+                // Only excute every ${freq} milliseconds.
+                var now = new Date().valueOf();
+                if (now - last_time <= freq) {
+                    return;
+                }
+                last_time = now;
+                
+                // Get the magnitude of the accel vector
+                var magnitude = Math.sqrt(e.acceleration.x ** 2 + e.acceleration.y ** 2 + e.acceleration.z ** 2);
 
-var x = 0, y = 0,
-    vx = 0, vy = 0,
-    ax = 0, ay = 0;
+                if (magnitude > fastThreshold) {
+                    fast = true;
+                } else {
+                    // magnitude is now <= threshold. If fast is still true, then we just stopped being fast.
+                    if (fast) {
 
-var last_time = new Date().valueOf();
-var timeout_millis = 100;
-	
-var sphere = document.getElementById("sphere");
+                        // "Bump" event detected!
+                        var li = document.createElement("li");
+                        document.getElementById("fast").appendChild(li);
+                        li.innerHTML = new Date();
+                        fast = false;
+                    }
+                }
 
-class Ring {
-    constructor(size) {
-        this.buffer = new Array(size);
-        this.size = size;
-        this.head = 0;
-    }
-    write(val) {
-        this.buffer[this.head] = val
-        this.head = (this.head + 1) % this.size;
-    }
-    avg() {
-        var sum = 0;
-        var count = 0;
-        for (; count < this.buffer.length; count++) {
-            if (isNaN(this.buffer[count])) break;
-            sum += this.buffer[count];
-        }
-        return sum / count;
-    }
-}
-
-var sampleRing = new Ring(50);
-
-var max = 0;
-
-var fastThreshold = 10;
-var fast = false;
-
-if (window.DeviceMotionEvent != undefined) {
-
-	window.ondevicemotion = function(e) {
-        var now = new Date().valueOf();
-        if (now - last_time <= timeout_millis) {
-            return;
-        }
-        last_time = now;
-        sampleRing.write(e.acceleration.x);
-
-        var x = Math.abs(e.acceleration.x);
-        var y = Math.abs(e.acceleration.y);
-        var z = Math.abs(e.acceleration.z);
-
-        var magnitude = Math.sqrt(e.acceleration.x ** 2 + e.acceleration.y ** 2 + e.acceleration.z ** 2);
-        if (magnitude > fastThreshold) {
-            fast = true;
-        } else {
-            if (fast) {
-                var li = document.createElement("li");
-                document.getElementById("fast").appendChild(li);
-                li.innerHTML = new Date();
+                // Just display the max and current magnitude of vector.
+                if (magnitude > maxMagnitude) {
+                    maxMagnitude = magnitude;
+                    document.getElementById("max").innerHTML = maxMagnitude;
+                }
+                document.getElementById("magnitude").innerHTML = magnitude;
             }
-            fast = false;
-        }
-        if (magnitude > max) {
-            max = magnitude;
-            document.getElementById("max").innerHTML = max;
-        }
-        document.getElementById("magnitude").innerHTML = magnitude;
-
-	}
-
-	setInterval( function() {
-		var landscapeOrientation = window.innerWidth/window.innerHeight > 1;
-		if ( landscapeOrientation) {
-			vx = vx + ay;
-			vy = vy + ax;
-		} else {
-			vy = vy - ay;
-			vx = vx + ax;
-		}
-		vx = vx * 0.98;
-		vy = vy * 0.98;
-		y = parseInt(y + vy / 50);
-		x = parseInt(x + vx / 50);
-		
-		boundingBoxCheck();
-		
-		sphere.style.top = y + "px";
-		sphere.style.left = x + "px";
-		
-	}, 1000);
-} 
-
-
-function boundingBoxCheck(){
-	if (x<0) { x = 0; vx = -vx; }
-	if (y<0) { y = 0; vy = -vy; }
-	if (x>document.documentElement.clientWidth-20) { x = document.documentElement.clientWidth-20; vx = -vx; }
-	if (y>document.documentElement.clientHeight-20) { y = document.documentElement.clientHeight-20; vy = -vy; }
-	
-}
-
-</script>
-
+        } 
+        
+    </script>
+    
 </body>
 </html>

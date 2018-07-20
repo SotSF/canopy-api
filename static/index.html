@@ -33,6 +33,7 @@
         
         // Movement is considered fast if the magnitude exceeds fastThreshold.
         var fastThreshold = 10;
+        var fastVec = [];
         var fast = false;
         
         if (window.DeviceMotionEvent != undefined) {
@@ -52,6 +53,7 @@
 
                 if (magnitude > fastThreshold) {
                     fast = true;
+                    fastVec = [e.acceleration.x, e.acceleration.y, e.acceleration.z];
                 } else {
                     // magnitude is now <= threshold. If fast is still true, then we just stopped being fast.
                     if (fast) {
@@ -59,7 +61,10 @@
                         // "Bump" event detected!
                         var li = document.createElement("li");
                         document.getElementById("fast").appendChild(li);
-                        li.innerHTML = new Date();
+                        li.innerHTML = new Date() + 
+                        "<br>x: " + fastVec[0] +
+                        "<br>y: " + fastVec[1] +
+                        "<br>z: " + fastVec[2];
                         fast = false;
                     }
                 }

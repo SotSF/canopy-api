@@ -26,16 +26,11 @@ public class CanopyMain {
 
         int port = 8080;
         Server server = new Server(port);
-
-//        ServletContextHandler context
-//                = new ServletContextHandler(server, "/");
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/");
-
         /*
          * Static Server
          */
 
+        ServletContextHandler resourceContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         ResourceHandler resourceHandler = new ResourceHandler();
 
         resourceHandler.setDirectoriesListed(true);
@@ -43,11 +38,13 @@ public class CanopyMain {
 
         resourceHandler.setResourceBase("./static");
 
-        HandlerList handlers = new HandlerList();
+        resourceContext.setHandler(resourceHandler);
+        resourceContext.setContextPath("/static");
 
         /*
          * Canopy API
          */
+
         DeviceRegistry registry = new DeviceRegistry();
 //        registry.setLogging(false);
 
@@ -56,13 +53,16 @@ public class CanopyMain {
 
         ServletHolder canopyServlet
                 = new ServletHolder(new ServletContainer(config));
-        canopyServlet.setInitOrder(0);
-        context.addServlet(canopyServlet, "/api/*");
+
+        ServletContextHandler canopyContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        canopyContext.setContextPath("/api");
+        canopyContext.addServlet(canopyServlet, "/*");
 
         /*
          * Run
          */
-        handlers.setHandlers(new Handler[] { resourceHandler, context, new DefaultHandler() });
+        HandlerList handlers = new HandlerList();
+        handlers.setHandlers(new Handler[] { resourceContext, canopyContext, new DefaultHandler() });
 
         server.setHandler(handlers);
 

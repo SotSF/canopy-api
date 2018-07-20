@@ -22,13 +22,14 @@ public class CanopyMain {
         ResourceConfig config = new ApplicationConfig(registry);
         config.packages("re.cretfi.se.api"); // TODO: put this in the config??
 
-        ServletHolder jerseyServlet
+        ServletHolder canopyServlet
                 = new ServletHolder(new ServletContainer(config));
 
         Server server = new Server(port);
         ServletContextHandler context
                 = new ServletContextHandler(server, "/");
-        context.addServlet(jerseyServlet, "/*");
+
+        context.addServlet(canopyServlet, "/api/*");
 
         System.out.println("Starting server on port " + port);
 

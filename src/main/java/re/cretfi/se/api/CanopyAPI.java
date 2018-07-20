@@ -14,7 +14,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
-@Path("/api")
+// prefixed with /api/ in CanopyMain.
+@Path("/")
 public class CanopyAPI implements Observer {
 
     private DeviceRegistry registry;

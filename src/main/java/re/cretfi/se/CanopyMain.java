@@ -1,45 +1,28 @@
 package re.cretfi.se;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.heroicrobot.dropbit.registry.DeviceRegistry;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.Scanner;
 import org.eclipse.jetty.util.resource.Resource;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import re.cretfi.se.api.ApplicationConfig;
 
-import java.io.File;
 import java.net.URI;
-import java.nio.file.Path;
+import java.net.URL;
 
 public class CanopyMain {
     public static void main(String[] args) throws Exception {
 
         int port = 8080;
         Server server = new Server(port);
-        /*
-         * Static Server
-         */
-
-        ServletContextHandler resourceContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        ResourceHandler resourceHandler = new ResourceHandler();
-
-        resourceHandler.setDirectoriesListed(true);
-        resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
-
-        resourceHandler.setResourceBase("./static");
-
-        resourceContext.setHandler(resourceHandler);
-        resourceContext.setContextPath("/static");
 
         /*
          * Canopy API
@@ -57,6 +40,26 @@ public class CanopyMain {
         ServletContextHandler canopyContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         canopyContext.setContextPath("/api");
         canopyContext.addServlet(canopyServlet, "/*");
+
+        /*
+         * Static Server
+         *
+         * In the project, finds files under src/main/java/resources/static/
+         */
+
+        URL webRootLocation = CanopyMain.class.getClass().getResource("/static/index.html");
+
+        URI webRootUri = URI.create(webRootLocation.toURI().toASCIIString().replaceFirst("/index.html$","/"));
+
+        System.out.println("webRootLocation: " + webRootLocation);
+        System.out.println("webRootUri: " + webRootUri);
+
+        ServletContextHandler resourceContext = new ServletContextHandler();
+        resourceContext.setContextPath("/");
+        resourceContext.setBaseResource(Resource.newResource(webRootUri));
+        resourceContext.setWelcomeFiles(new String[] { "index.html" });
+
+        resourceContext.addServlet(DefaultServlet.class, "/");
 
         /*
          * Run

@@ -9,7 +9,7 @@ As of now (Tuesday 17-Jul-18), the rendering endpoints do not return json, or an
 | method | endpoint           | description                                                                              |
 |--------|--------------------|------------------------------------------------------------------------------------------|
 | GET    | `/api/ping`        | Returns json-encoded "pong". Can be used to check connectivity.                          |
-| GET    | `/api/echo`        | Returns whatever you sent it. Can be used to sanity-check requests.                      |
+| POST   | `/api/echo`        | Returns whatever you sent it. Can be used to sanity-check requests.                      |
 | GET    | `/api/clear`       | Renders black (off) to all pixels.                                                       |
 | GET    | `/api/start`       | Causes the server to start pushing pixels to the pixelpushers. On when the server starts.|
 | GET    | `/api/stop`        | Causes the server to stop pushing pixels to the pixelpushers.                            |

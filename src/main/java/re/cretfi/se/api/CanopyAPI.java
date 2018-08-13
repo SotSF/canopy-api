@@ -3,7 +3,6 @@ package re.cretfi.se.api;
 import com.heroicrobot.dropbit.devices.pixelpusher.Pixel;
 import com.heroicrobot.dropbit.devices.pixelpusher.Strip;
 import com.heroicrobot.dropbit.registry.DeviceRegistry;
-import re.cretfi.se.api.response.RegistryStats;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -14,21 +13,25 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
+import re.cretfi.se.api.response.RegistryStats;
+import re.cretfi.se.api.ArtnetController;
+
 // prefixed with /api/ in CanopyMain.
 @Path("/")
 public class CanopyAPI implements Observer {
 
     private DeviceRegistry registry;
+    private ArtnetController controller;
 
     byte[] renderBuffer = new byte[0];
     boolean pushing;
 
     @Inject
-    CanopyAPI(DeviceRegistry registry) {
-        this.registry = registry;
+    CanopyAPI(ArtnetController controller) {
+        this.controller = controller;
         this.pushing = true;
-        registry.startPushing();
-        registry.addObserver(this);
+        //registry.startPushing();
+        //registry.addObserver(this);
 //        registry.setFrameCallback(this, "flush");
     }
 
@@ -104,7 +107,7 @@ public class CanopyAPI implements Observer {
             return "invalid pixel array length";
 
         this.renderBuffer = data;
-        flush();
+        controller.send(data);
 
         return "yay\n";
     }
@@ -144,19 +147,25 @@ public class CanopyAPI implements Observer {
     }
 
     public void flush() {
-        List<Strip> strips = registry.getStrips();
         int bufferLength = renderBuffer.length;
-        for (Strip strip : strips) {
-            int stripLength = strip.getLength();
-            Pixel[] pixels = new Pixel[stripLength];
 
-            for (int j = 0, i = 0;
-                 j < stripLength && i < bufferLength - 2;
-                 j++, i += 3) {
-                pixels[j] = new Pixel(renderBuffer[i], renderBuffer[i + 1], renderBuffer[i + 2]);
+        // Iterate over the buffer and split it into DMX universes
+
+        int numUniverses = bufferLength % 510;
+
+
+        //List<Strip> strips = registry.getStrips();
+        //for (Strip strip : strips) {
+        //    int stripLength = strip.getLength();
+        //    Pixel[] pixels = new Pixel[stripLength];
+
+        //    for (int j = 0, i = 0;
+        //         j < stripLength && i < bufferLength - 2;
+        //         j++, i += 3) {
+        //        pixels[j] = new Pixel(renderBuffer[i], renderBuffer[i + 1], renderBuffer[i + 2]);
 //                strip.setPixel(pixel, j);
-            }
-            strip.setPixels(pixels);
-        }
+        //    }
+        //    strip.setPixels(pixels);
+        //}
     }
 }

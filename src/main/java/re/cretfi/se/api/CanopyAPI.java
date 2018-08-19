@@ -122,6 +122,20 @@ public class CanopyAPI implements Observer {
         return "yay\n";
     }
 
+    @POST
+    @Path("/renderbytesswizzled")
+    public String renderbytesswizzled(String requestData) {
+        byte[] data = requestData.getBytes();
+
+        if (data.length % 3 != 0)
+            return "invalid pixel array length";
+
+        this.renderBuffer = data;
+        flush(true);
+
+        return "yay\n";
+    }
+
 
 
     @POST
@@ -142,7 +156,11 @@ public class CanopyAPI implements Observer {
 //        strips = this.registry.getStrips();
     }
 
-    public void flush() {
+    public void flush(){
+        flush(false);
+    }
+
+    public void flush(boolean swizzle) {
         List<Strip> strips = registry.getStrips();
         int bufferLength = renderBuffer.length;
         for (Strip strip : strips) {
@@ -152,7 +170,16 @@ public class CanopyAPI implements Observer {
             for (int j = 0, i = 0;
                  j < stripLength && i < bufferLength - 2;
                  j++, i += 3) {
-                pixels[j] = new Pixel(renderBuffer[i], renderBuffer[i + 1], renderBuffer[i + 2]);
+                boolean swizzMe = (j/ 75) % 2 == 0;
+                int index;
+
+                //Reverse order of every other block of 75 pixels for physical strip configuration
+                if (swizzle && swizzMe) {
+                    index = i - (i % 75) + (75 - i % 75) -1;
+                } else {
+                    index = i;
+                }
+                pixels[j] = new Pixel(renderBuffer[index], renderBuffer[index + 1], renderBuffer[index + 2]);
 //                strip.setPixel(pixel, j);
             }
             strip.setPixels(pixels);
